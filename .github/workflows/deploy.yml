@@ -1,0 +1,39 @@
+name: Deploy Django App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          if_key_exists: replace
+
+      - name: Deploy to remote server
+        env:
+          REMOTE_HOST: ${{ secrets.SERVER_IP }}
+          REMOTE_PORT: ${{ secrets.SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          REMOTE_DIR: ${{ secrets.REMOTE_DIR }}
+        run: |
+          ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
+            cd $REMOTE_DIR && \
+            git fetch origin && \
+            git checkout main && \
+            git pull origin main && \
+            docker build -t my-django-app . && \
+            docker stop my-django-app || true && \
+            docker rm my-django-app || true && \
+            docker run -d --name my-django-app -p 8000:8000 my-django-app"
