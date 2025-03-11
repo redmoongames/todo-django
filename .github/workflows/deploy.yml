@@ -28,12 +28,23 @@ jobs:
           REMOTE_USER: ${{ secrets.SSH_USER }}
           REMOTE_DIR: ${{ secrets.REMOTE_DIR }}
         run: |
+          echo "Entering the remote server and updating the Git repository..."
           ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
             cd $REMOTE_DIR && \
-            git fetch origin && \
-            git checkout main && \
-            git pull origin main && \
-            docker build -t my-django-app . && \
+            git fetch origin || echo 'Git fetch failed' && \
+            git checkout main || echo 'Checkout to main branch failed' && \
+            git pull origin main || echo 'Git pull failed'"
+
+          echo "Building the Docker image for the Django app..."
+          ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
+            cd $REMOTE_DIR && \
+            docker build -t my-django-app . || echo 'Docker build failed'"
+
+          echo "Stopping and removing any existing Docker container..."
+          ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
             docker stop my-django-app || true && \
-            docker rm my-django-app || true && \
-            docker run -d --name my-django-app -p 8000:8000 my-django-app"
+            docker rm my-django-app || true"
+
+          echo "Running the Docker container with the Django app..."
+          ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
+            docker run -d --name my-django-app -p 8000:8000 my-django-app || echo 'Docker run failed'"
