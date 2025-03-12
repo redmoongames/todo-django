@@ -12,27 +12,24 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+from typing import Dict, List, Any, Union, cast
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
+load_dotenv(dotenv_path=BASE_DIR / '.env')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+SECRET_KEY: str = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-1!5(c%$9ped)3xugm3d#2rb*v4(4belm&a2jl$j8w%t)q(edcz')
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-1!5(c%$9ped)3xugm3d#2rb*v4(4belm&a2jl$j8w%t)q(edcz')
+DEBUG: bool = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+ALLOWED_HOSTS: List[str] = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'api.redmen.store']
-
-# CORS settings for development
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True  # Only in development!
-    CORS_ALLOW_CREDENTIALS = True
-    CORS_ALLOW_METHODS = [
+if os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True':
+    CORS_ALLOW_ALL_ORIGINS: bool = True
+    CORS_ALLOW_CREDENTIALS: bool = True
+    CORS_ALLOW_METHODS: List[str] = [
         'DELETE',
         'GET',
         'OPTIONS',
@@ -40,7 +37,7 @@ if DEBUG:
         'POST',
         'PUT',
     ]
-    CORS_ALLOW_HEADERS = [
+    CORS_ALLOW_HEADERS: List[str] = [
         'accept',
         'accept-encoding',
         'authorization',
@@ -51,29 +48,27 @@ if DEBUG:
         'x-csrftoken',
         'x-requested-with',
     ]
-    # Cookie settings for development
-    SESSION_COOKIE_SECURE = True  # Required for SameSite=None
-    CSRF_COOKIE_SECURE = True    # Required for SameSite=None
-    SESSION_COOKIE_SAMESITE = 'None'
-    CSRF_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SECURE: bool = True  # Required for SameSite=None
+    CSRF_COOKIE_SECURE: bool = True    # Required for SameSite=None
+    SESSION_COOKIE_SAMESITE: str = 'None'
+    CSRF_COOKIE_SAMESITE: str = 'None'
 else:
-    # Production settings
-    CORS_ALLOWED_ORIGINS = [
+    CORS_ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://redmen.store",
         "https://www.redmen.store",
     ]
-    CORS_ALLOW_CREDENTIALS = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SAMESITE = 'Strict'
-    CSRF_COOKIE_SAMESITE = 'Strict'
+    CORS_ALLOW_CREDENTIALS: bool = os.environ.get('CORS_ALLOW_CREDENTIALS', 'True') == 'True'
+    SESSION_COOKIE_SECURE: bool = True
+    CSRF_COOKIE_SECURE: bool = True
+    SESSION_COOKIE_SAMESITE: str = 'Strict'
+    CSRF_COOKIE_SAMESITE: str = 'Strict'
 
 
 # Application definition
 
-INSTALLED_APPS = [
+INSTALLED_APPS: List[str] = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -84,8 +79,8 @@ INSTALLED_APPS = [
     'todo_api',
 ]
 
-MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Must be as high as possible
+MIDDLEWARE: List[str] = [
+    'corsheaders.middleware.CorsMiddleware',  
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -96,9 +91,9 @@ MIDDLEWARE = [
     'todo_api.middleware.TrailingSlashMiddleware',
 ]
 
-ROOT_URLCONF = 'todolist_project.urls'
+ROOT_URLCONF: str = 'todolist_project.urls'
 
-TEMPLATES = [
+TEMPLATES: List[Dict[str, Any]] = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
@@ -114,13 +109,13 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'todolist_project.wsgi.application'
+WSGI_APPLICATION: str = 'todolist_project.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
+DATABASES: Dict[str, Dict[str, Any]] = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
@@ -131,7 +126,7 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS: List[Dict[str, str]] = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
@@ -150,21 +145,21 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE: str = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE: str = 'UTC'
 
-USE_I18N = True
+USE_I18N: bool = True
 
-USE_TZ = True
+USE_TZ: bool = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL: str = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD: str = 'django.db.models.BigAutoField'
