@@ -2,8 +2,10 @@ from django.urls import path
 from . import views_tasks
 from . import views_auth
 from . import views_labels
+from . import views_health
 
 urlpatterns = [
+    path('health/', views_health.health_check, name='health_check'),
     # Auth endpoints
     path('auth/register/', views_auth.register, name='register'),
     path('auth/login/', views_auth.login_view, name='login'),
