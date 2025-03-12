@@ -21,7 +21,7 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: replace
 
-      - name: Deploy to remote server
+      - name: Prepare remote environment
         env:
           REMOTE_HOST: ${{ secrets.SERVER_IP }}
           REMOTE_PORT: ${{ secrets.SERVER_PORT }}
@@ -32,8 +32,41 @@ jobs:
             cd $REMOTE_DIR && \
             git fetch origin && \
             git checkout main && \
-            git pull origin main && \
-            docker build -t my-django-app . && \
+            git pull origin main"
+
+      - name: Prepare database
+        env:
+          REMOTE_HOST: ${{ secrets.SERVER_IP }}
+          REMOTE_PORT: ${{ secrets.SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          REMOTE_DIR: ${{ secrets.REMOTE_DIR }}
+        run: |
+          ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
+            cd $REMOTE_DIR && \
+            # Ensure database file exists and has proper permissions
+            touch db.sqlite3 && \
+            chmod 666 db.sqlite3"
+
+      - name: Build Docker image
+        env:
+          REMOTE_HOST: ${{ secrets.SERVER_IP }}
+          REMOTE_PORT: ${{ secrets.SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          REMOTE_DIR: ${{ secrets.REMOTE_DIR }}
+        run: |
+          ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
+            cd $REMOTE_DIR && \
+            docker build -t my-django-app ."
+
+      - name: Deploy container
+        env:
+          REMOTE_HOST: ${{ secrets.SERVER_IP }}
+          REMOTE_PORT: ${{ secrets.SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          REMOTE_DIR: ${{ secrets.REMOTE_DIR }}
+        run: |
+          ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
+            cd $REMOTE_DIR && \
             docker stop my-django-app || true && \
             docker rm my-django-app || true && \
             docker run -d --name my-django-app \

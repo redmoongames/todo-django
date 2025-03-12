@@ -12,6 +12,12 @@ RUN pip install -r requirements.txt
 COPY . /app
 
 RUN echo '#!/bin/bash\n\
+echo "Checking database directory..."\n\
+DB_DIR=$(dirname $(python -c "from django.conf import settings; print(settings.DATABASES[\"default\"][\"NAME\"])"))\n\
+mkdir -p $DB_DIR\n\
+echo "Ensuring proper permissions..."\n\
+touch $(python -c "from django.conf import settings; print(settings.DATABASES[\"default\"][\"NAME\"])")\n\
+chmod 666 $(python -c "from django.conf import settings; print(settings.DATABASES[\"default\"][\"NAME\"])")\n\
 echo "Running database migrations..."\n\
 python manage.py migrate --noinput\n\
 echo "Starting Django server..."\n\
