@@ -24,7 +24,13 @@ SECRET_KEY: str = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-1!5(c%$9p
 
 DEBUG: bool = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS: List[str] = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# Get ALLOWED_HOSTS from environment and ensure it's properly processed
+allowed_hosts_str: str = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1')
+ALLOWED_HOSTS: List[str] = [host.strip() for host in allowed_hosts_str.split(',')]
+
+# Print debug information about ALLOWED_HOSTS
+print(f"DEBUG: ALLOWED_HOSTS environment variable: '{allowed_hosts_str}'")
+print(f"DEBUG: Processed ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
 if os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True':
     CORS_ALLOW_ALL_ORIGINS: bool = True
