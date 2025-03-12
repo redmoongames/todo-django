@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1!5(c%$9ped)3xugm3d#2rb*v4(4belm&a2jl$j8w%t)q(edcz'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-1!5(c%$9ped)3xugm3d#2rb*v4(4belm&a2jl$j8w%t)q(edcz')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'api.redmen.store']
 
 # CORS settings for development
 if DEBUG:
@@ -60,6 +61,8 @@ else:
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://redmen.store",
+        "https://www.redmen.store",
     ]
     CORS_ALLOW_CREDENTIALS = True
     SESSION_COOKIE_SECURE = True
