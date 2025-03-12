@@ -62,8 +62,12 @@ else:
     CORS_ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "http://redmen.store",
         "https://redmen.store",
+        "http://www.redmen.store",
         "https://www.redmen.store",
+        "http://api.redmen.store",
+        "https://api.redmen.store",
     ]
     CORS_ALLOW_CREDENTIALS: bool = os.environ.get('CORS_ALLOW_CREDENTIALS', 'True') == 'True'
     SESSION_COOKIE_SECURE: bool = True
