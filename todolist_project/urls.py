@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    path('health/', include('todolist_project.views_health'), name='root_health_check'),
     path('admin/', admin.site.urls),
     path('', include('todo_api.urls')),
 ]

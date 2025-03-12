@@ -6,16 +6,15 @@ registration, login, logout, token refresh, and token verification.
 from __future__ import annotations
 
 import json
-from typing import Dict, Any, Tuple
+from typing import Dict, Any
+import jwt
 
 from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from django.core.cache import cache
-import jwt
 
-from .decorators import jwt_authentication_required, rate_limit
+from .decorators import rate_limit
 from .utils import jwt_service
 from .utils.jwt_service import TokenType
 from .utils.password_service import password_service
