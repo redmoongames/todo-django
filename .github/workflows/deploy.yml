@@ -36,4 +36,8 @@ jobs:
             docker build -t my-django-app . && \
             docker stop my-django-app || true && \
             docker rm my-django-app || true && \
-            docker run -d --name my-django-app -p 8000:8000 my-django-app"
+            docker run -d --name my-django-app \
+              -p 8000:8000 \
+              -v $REMOTE_DIR/db.sqlite3:/app/db.sqlite3 \
+              -v $REMOTE_DIR/.env:/app/.env \
+              my-django-app"
