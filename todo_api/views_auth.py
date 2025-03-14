@@ -6,7 +6,8 @@ registration, login, logout, token refresh, and token verification.
 from __future__ import annotations
 
 import json
-from typing import Dict, Any
+import traceback
+from typing import Dict, Any, Callable
 import jwt
 
 from django.http import JsonResponse, HttpRequest, HttpResponse
@@ -46,8 +47,31 @@ def success_response(data: Dict[str, Any], status_code: int = 200) -> JsonRespon
     )
 
 
+def ensure_json_response(view_func: Callable) -> Callable:
+    """Decorator to ensure all responses are JSON, even in case of unexpected errors."""
+    def wrapper(request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        try:
+            return view_func(request, *args, **kwargs)
+        except Exception as e:
+            # Log the full traceback for debugging
+            error_traceback = traceback.format_exc()
+            print(f"[ERROR] Unexpected exception in {view_func.__name__}:\n{error_traceback}")
+            
+            # Return a JSON error response instead of letting Django handle it
+            return JsonResponse(
+                {
+                    'success': False,
+                    'error': f'Server error: {str(e)}',
+                    'details': 'An unexpected error occurred. Please try again later.'
+                },
+                status=500
+            )
+    return wrapper
+
+
 @csrf_exempt
 @rate_limit('register', limit=5, period=60)
+@ensure_json_response
 def register(request: HttpRequest) -> HttpResponse:
     """Register a new user on POST request. Should have a username and password."""
     if request.method != 'POST':
@@ -106,6 +130,7 @@ def register(request: HttpRequest) -> HttpResponse:
 
 @csrf_exempt
 @rate_limit('login', limit=10, period=60)
+@ensure_json_response
 def login_view(request: HttpRequest) -> HttpResponse:
     """Authenticate a user and provide access tokens by POST request."""
     if request.method != 'POST':
@@ -157,6 +182,7 @@ def login_view(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt
+@ensure_json_response
 def logout_view(request: HttpRequest) -> HttpResponse:
     """Log out a user by invalidating their tokens with POST request."""
     if request.method != 'POST':
@@ -200,6 +226,7 @@ def logout_view(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt
+@ensure_json_response
 def refresh_token_view(request: HttpRequest) -> HttpResponse:
     """Refresh the access token using a valid refresh token with POST request."""
     if request.method != 'POST':
@@ -252,6 +279,7 @@ def refresh_token_view(request: HttpRequest) -> HttpResponse:
 
 @csrf_exempt
 @rate_limit('verify', limit=30, period=60)
+@ensure_json_response
 def verify_token_view(request: HttpRequest) -> HttpResponse:
     """Verify the validity of the access token with GET request."""
     if request.method != 'GET':
