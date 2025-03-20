@@ -45,9 +45,12 @@ jobs:
             cd $REMOTE_DIR && \
             # Ensure database file exists and has proper permissions
             touch db.sqlite3 && \
-            chmod 666 db.sqlite3"
+            chmod 666 db.sqlite3 && \
+            # Create media directory if it doesn't exist
+            mkdir -p media && \
+            chmod 777 media"
 
-      - name: Build Docker image
+      - name: Deploy with Docker Compose
         env:
           REMOTE_HOST: ${{ secrets.SERVER_IP }}
           REMOTE_PORT: ${{ secrets.SERVER_PORT }}
@@ -56,9 +59,10 @@ jobs:
         run: |
           ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
             cd $REMOTE_DIR && \
-            docker build -t my-django-app ."
+            docker-compose down || true && \
+            docker-compose up -d"
 
-      - name: Deploy container
+      - name: Check deployment
         env:
           REMOTE_HOST: ${{ secrets.SERVER_IP }}
           REMOTE_PORT: ${{ secrets.SERVER_PORT }}
@@ -67,10 +71,6 @@ jobs:
         run: |
           ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
             cd $REMOTE_DIR && \
-            docker stop my-django-app || true && \
-            docker rm my-django-app || true && \
-            docker run -d --name my-django-app \
-              -p 8000:8000 \
-              -v $REMOTE_DIR/db.sqlite3:/app/db.sqlite3 \
-              -v $REMOTE_DIR/.env:/app/.env \
-              my-django-app"
+            docker-compose ps && \
+            echo 'Checking Redis connection:' && \
+            docker exec -it redis redis-cli ping"

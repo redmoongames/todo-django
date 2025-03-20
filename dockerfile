@@ -18,6 +18,13 @@ mkdir -p $DB_DIR\n\
 echo "Ensuring proper permissions..."\n\
 touch $(python -c "from django.conf import settings; print(settings.DATABASES[\"default\"][\"NAME\"])")\n\
 chmod 666 $(python -c "from django.conf import settings; print(settings.DATABASES[\"default\"][\"NAME\"])")\n\
+echo "Checking Redis connectivity..."\n\
+python -c "import redis; r = redis.Redis(host=\"redis\", port=6379, db=1); r.ping()"\n\
+REDIS_CHECK=$?\n\
+if [ $REDIS_CHECK -ne 0 ]; then\n\
+    echo "Failed to connect to Redis. Please make sure Redis is running."\n\
+    exit 1\n\
+fi\n\
 echo "Running database migrations..."\n\
 python manage.py migrate --noinput\n\
 echo "Starting Django server..."\n\
