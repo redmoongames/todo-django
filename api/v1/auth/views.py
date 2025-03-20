@@ -19,7 +19,7 @@ def login_view(request: HttpRequest) -> HttpResponse:
         password = data.get("password")
         
         if not username or not password:
-            return JsonResponse.error("Login ID and password are required")
+            return JsonResponse.error("Username and password are required")
         
         if '@' in username:
             try:

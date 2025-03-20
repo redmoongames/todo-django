@@ -94,11 +94,11 @@ POST /api/v1/auth/login/
 Request body:
 ```json
 {
-    "login_id": "yourusername or your@email.com",
+    "username": "yourusername or your@email.com",
     "password": "yourpassword"
 }
 ```
-Note: You can use either your username or email address as the login_id.
+Note: You can use either your username or email address as the username.
 
 #### Logout
 ```
@@ -427,7 +427,7 @@ All API endpoints return appropriate HTTP status codes:
    ```
    POST /api/v1/auth/login/
    {
-     "login_id": "john_doe",
+     "username": "john_doe",
      "password": "secure_password123"
    }
    ```
