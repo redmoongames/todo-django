@@ -34,7 +34,7 @@ jobs:
             git checkout main && \
             git pull origin main"
 
-      - name: Prepare database
+      - name: Prepare directories and permissions
         env:
           REMOTE_HOST: ${{ secrets.SERVER_IP }}
           REMOTE_PORT: ${{ secrets.SERVER_PORT }}
@@ -50,6 +50,18 @@ jobs:
             mkdir -p media && \
             chmod 777 media"
 
+      - name: Clean up existing containers
+        env:
+          REMOTE_HOST: ${{ secrets.SERVER_IP }}
+          REMOTE_PORT: ${{ secrets.SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          REMOTE_DIR: ${{ secrets.REMOTE_DIR }}
+        run: |
+          ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
+            echo 'Stopping and removing existing containers...' && \
+            docker stop my-django-app redis || true && \
+            docker rm my-django-app redis || true"
+
       - name: Deploy with Docker Compose
         env:
           REMOTE_HOST: ${{ secrets.SERVER_IP }}
@@ -59,10 +71,11 @@ jobs:
         run: |
           ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
             cd $REMOTE_DIR && \
-            docker-compose down || true && \
-            docker-compose up -d"
+            echo 'Building and starting containers...' && \
+            docker compose build && \
+            docker compose up -d"
 
-      - name: Check deployment
+      - name: Verify deployment
         env:
           REMOTE_HOST: ${{ secrets.SERVER_IP }}
           REMOTE_PORT: ${{ secrets.SERVER_PORT }}
@@ -71,6 +84,29 @@ jobs:
         run: |
           ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
             cd $REMOTE_DIR && \
-            docker-compose ps && \
+            echo 'Checking container status:' && \
+            docker compose ps && \
             echo 'Checking Redis connection:' && \
-            docker exec -it redis redis-cli ping"
+            docker exec redis redis-cli ping || echo 'Redis check failed' && \
+            echo 'Checking Django app logs:' && \
+            docker logs my-django-app --tail 20"
+
+      - name: Deployment notification
+        if: always()
+        env:
+          REMOTE_HOST: ${{ secrets.SERVER_IP }}
+          REMOTE_PORT: ${{ secrets.SERVER_PORT }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          REMOTE_DIR: ${{ secrets.REMOTE_DIR }}
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "Deployment completed successfully"
+          else
+            echo "Deployment failed"
+            ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "\
+              cd $REMOTE_DIR && \
+              echo 'Checking container status after failure:' && \
+              docker compose ps && \
+              echo 'Container logs:' && \
+              docker compose logs --tail 50"
+          fi
