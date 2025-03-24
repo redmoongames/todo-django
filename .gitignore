@@ -1,5 +1,11 @@
 # Created by https://www.gitignore.io
 
+# Igon virtual environment
+env/
+.env/
+.venv/
+venv/
+
 ### OSX ###
 .DS_Store
 .AppleDouble
