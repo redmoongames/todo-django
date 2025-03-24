@@ -38,11 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
+    'corsheaders',
     'api',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,6 +70,22 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://redmen.store",
+    "http://redmen.store",
+    "https://www.redmen.store",
+    "http://www.redmen.store",
+    "http://localhost:3000",
+]
+
+# CSRF settings
+CSRF_TRUSTED_ORIGINS = [
+    "https://www.redmen.store",
+    "http://www.redmen.store",
+    "http://localhost:3000",
 ]
 
 WSGI_APPLICATION = 'main.wsgi.application'
