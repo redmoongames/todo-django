@@ -78,13 +78,18 @@ CORS_ALLOWED_ORIGINS = [
     "http://redmen.store",
     "https://www.redmen.store",
     "http://www.redmen.store",
+    "https://api.redmen.store",
+    "http://api.redmen.store",
     "http://localhost:3000",
 ]
 
-# CSRF settings
 CSRF_TRUSTED_ORIGINS = [
+    "https://redmen.store",
+    "http://redmen.store",
     "https://www.redmen.store",
     "http://www.redmen.store",
+    "https://api.redmen.store",
+    "http://api.redmen.store",
     "http://localhost:3000",
 ]
 
